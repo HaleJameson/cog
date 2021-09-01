@@ -1,16 +1,25 @@
-const express = require("express");
+import express from 'express';
 const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware variables
-const dotenv = require("dotenv").config({ path: "./config.env" });
-const mongoose = require("mongoose");
-const helmet = require("helmet");
-const morgan = require("morgan");
+import dotenv from 'dotenv'; 
+dotenv.config({ path: "./config.env" });
+import mongoose from 'mongoose';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import cors from 'cors';
 
-// Routes
-const userRoute = require("./routes/users");
-const authRoute = require("./routes/auth");
+
+// API Routes
+import userRoute from './routes/users.js';
+import authRoute from './routes/auth.js';
+
+
+
+// Page Routes
+import postsRoute from './routes/posts.js';
+
 
 mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true},
     ()=>{
@@ -22,10 +31,13 @@ mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true},
 // Middleware 
 app.use(express.json());
 app.use(helmet());
-app.use(morgan("common"));
+app.use(morgan("dev"));
+app.use(cors());
 
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
+app.use("/api/posts", postsRoute);
+
 
 app.get('/', (req, res) => {
   res.send("Welcome to Cog");
