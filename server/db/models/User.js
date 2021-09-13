@@ -10,6 +10,13 @@ const UserSchema = new mongoose.Schema({
         unique: true,
 
     },
+    id: { 
+        type: String,
+        unique: true 
+    },
+    name: { type: String },
+    firstName: { type: String },
+    last: { type: String },
     email:{
         type: String,
         required: true,
@@ -19,7 +26,6 @@ const UserSchema = new mongoose.Schema({
     password:{
         type:String,
         required: true, 
-        min:6
     },
     profilePicture:{
         type: String,
@@ -40,10 +46,12 @@ const UserSchema = new mongoose.Schema({
     desc:{
         type: String,
         max: 50
-    }, city: {
+    }, 
+    city: {
         type: String,
         max: 50
-    }, from: {
+    }, 
+    from: {
         type: String,
         max: 50
     }

@@ -1,8 +1,10 @@
 import User from '../db/models/User.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 
 // Create New User
+// Not used
 export const createNewUser = async (req, res) => {
 
     try {
@@ -12,7 +14,7 @@ export const createNewUser = async (req, res) => {
 
         // create user JSON
         const newUser = new User({
-            username: req.body.username,
+            username: req.body.email,
             email: req.body.email,
             password: hashedPassword
         });
@@ -26,21 +28,47 @@ export const createNewUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
     try {
-        const user = await User.findOne({ email: req.body.email });
-        if (!user) {
-            res.status(404).json("User not found");
-        }
+        const { email, password } = req.body;
+        const user = await User.findOne({ email: email });
+        if (!user) { return res.status(404).json("User not found"); }
 
 
         const validPassword = await bcrypt.compare(req.body.password, user.password);
         if (!validPassword) {
-            res.status(400).json("Wrong password");
+            return res.status(400).json("Wrong password");
         }
 
-        else res.status(200).json("Successfully logged in:");
+        const token = jwt.sign({ email: user.email, id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        return res.status(200).json({ result: user, token});
+
     } catch (err) {
+        res.status(500).json("Something went wrong");
         console.log(err);
     }
 
 };
+
+export const registerUser = async (req, res) => {
+    const { email, password, confirmPassword, firstName, lastName } = req.body;
+
+    try {
+        const user = await User.findOne({ email: email });
+        if (user) { return res.status(400).json("User already exists"); }
+
+        if (password === confirmPassword ) return res.status(400).json("Passwords do not match");
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        const result = await User.create({ username: email, email, password: hashedPassword, firstName, lastName, name: `${firstName} ${lastName}` });
+        const token = jwt.sign({ email: result.email, id: result._id}, 'test', { expiresIn: '1h' });
+
+        res.status(200).json({ result: result, token});
+
+    }
+    catch (err) {
+        res.status(500).json("Something went wrong");
+        console.log(err);
+    }
+}
 
