@@ -1,4 +1,4 @@
-Cog: A blog / social media website
+Cog
 
   nodemon server.js
     Starts the server with live updating
